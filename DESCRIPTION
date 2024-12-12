@@ -1,0 +1,16 @@
+Package: r4inst
+Title: R Helpers for industrial instrumentation and control projects
+Version: 0.0.0.9000
+Authors@R: 
+    person("Jhonatan", "Zambrano", , "jhonatanz@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: 
+    Development of classes and methods for industrial instrumentation and 
+    control projects. The objective is to make a first step towards the 
+    development of an app that provide tools to automate various process in the
+    engineering required for this kind of projects.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
