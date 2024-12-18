@@ -9,7 +9,7 @@
 #' @details
 #' The object store information about cables to be used in an automation project
 #' @export
-cable <- R6::R6Class("cable",
+CB <- R6::R6Class("CB",
                      public = list(
                        #' @field tag Cable name: character.
                        tag = NULL,
@@ -39,6 +39,7 @@ cable <- R6::R6Class("cable",
                            stop("Tag for cable should have at least one character")
                          }
                          self$tag <- as.character(tag)
+                         invisible(self)
                        },
 
                        #' @description
@@ -50,14 +51,14 @@ cable <- R6::R6Class("cable",
                        #' @examples
                                               #' # example code
                                               #'
-                                              #' New_Cable <- cable$new("cable-001")
+                                              #' New_Cable <- CB$new("cable-001")
                                               #'
                                               #' # Structure definition of a cable grouped by pairs, with 3 pairs,
                                               #' # individual and overall shield.
                                               #'
-                                              #' New_Cable$generate_structure("pair", 3, TRUE, TRUE)
-                                              #' New_Cable$df_structure()
-                       generate_structure = function(group, groups_qty, ind_shields,
+                                              #' New_Cable$gen_struct("pair", 3, TRUE, TRUE)
+                                              #' New_Cable$df_struct()
+                       gen_struct = function(group, groups_qty, ind_shields,
                                                      ovr_shield){
                          self$group <- group
                          self$groups_qty <- groups_qty
@@ -109,11 +110,11 @@ cable <- R6::R6Class("cable",
                        #' @returns a data frame with the structure of the cable.
                        #' @examples
                                               #' # Conversion of cable structure to a data frame
-                                              #' New_Cable<- cable$new("cable-001")
+                                              #' New_Cable<- CB$new("cable-001")
                                               #'
-                                              #' df_struct <- New_Cable$df_structure()
+                                              #' df_struct <- New_Cable$df_struct()
                                               #' str(df_struct)
-                       df_structure = function(){
+                       df_struct = function(){
                          df <- tibble::tibble(tag = self$tag, dplyr::bind_rows(self$struct))
                          return(df)
                        },
@@ -124,7 +125,7 @@ cable <- R6::R6Class("cable",
                        #' @examples
                                               #' # Update of atributtes of a cable
                                               #'
-                                              #' New_Cable <- cable$new("cable-001")
+                                              #' New_Cable <- CB$new("cable-001")
                                               #'
                                               #' at <- list(
                                               #'   cable_spec = "cab-spec-001",
@@ -137,6 +138,7 @@ cable <- R6::R6Class("cable",
                          self$cable_spec <- attrib$cable_spec
                          self$ovr_diam <- attrib$ovr_diam
                          self$ovr_diam_UOM <- attrib$ovr_diam_UOM
+                         invisible(self)
                        },
 
                        #' @description
