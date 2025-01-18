@@ -9,7 +9,6 @@ test_that("cable initialization works", {
 
 test_that("generate_structure works", {
   cable_obj <- CB$new("cable-001")
-
   # Test a cable with pairs, individual shields, and overall shield
   cable_obj$gen_struct("pair", 3, TRUE, TRUE)
   expect_equal(cable_obj$group, "pair")

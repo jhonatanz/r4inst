@@ -13,7 +13,7 @@ allows:
 \itemize{
 \item Create a terminal strip: given a name, a device and type of terminal.
 \item Create a structure of terminal strip given a quantity of terminals.
-\item Add terminals to connect a cable.
+\item Add terminals to connect a cable and connect this cable.
 \item Connect a cable conductor to terminals in the strip.
 }
 }
@@ -23,7 +23,7 @@ The TS objects can be of two types: "end" and "pass".
 The "end" terminal strip type is used for devices at the end of a path, i.e
 instruments, control panels, final elements, control systems.
 
-The "pass" terminal strip type is used for Junction Boxes or marshalling
+The "pass" terminal strip type is used for Junction Boxes or Marshalling
 panels in which the terminals will have two sides: "input" and "output", and
 terminal will connect two ends of cables.
 }
@@ -41,7 +41,7 @@ New_TS$gen_struct(3)
 New_cable <- CB$new("CB-001")
 New_cable$gen_struct("pair", 1, TRUE, FALSE)
 
-New_TS$add_cable(New_cable, side = "input")
+New_TS$add_cable(New_cable, side = "input", cable_side = "dest")
 (New_TS_df_updated <- New_TS$df_struct())
 
 ## ------------------------------------------------
@@ -56,7 +56,7 @@ New_TS$gen_struct(3)
 New_cable <- CB$new("CB-001")
 New_cable$gen_struct("pair", 1, TRUE, FALSE)
 
-New_TS$con_cable(New_cable, init = 1)
+New_TS$con_cable(New_cable, init = 1, cable_side = "origin")
 
 (New_TS_df_upt <- New_TS$df_struct())
 
@@ -133,7 +133,8 @@ A new \code{TS} object.
 \if{latex}{\out{\hypertarget{method-TS-gen_struct}{}}}
 \subsection{Method \code{gen_struct()}}{
 Creates the structure of terminals object. Modifies
-the struct field of the object.
+the struct field of the object. To be run the first time
+we create a structure of a TS.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{TS$gen_struct(term_qty)}\if{html}{\out{</div>}}
 }
@@ -171,16 +172,18 @@ current TS object.
 Add terminals to the terminal strip at the end of it and
 connect a cable to those.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TS$add_cable(cable, side = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TS$add_cable(cable, side = NULL, cable_side)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{cable}}{a cable object to be added}
+\item{\code{cable}}{a cable object to be added.}
 
 \item{\code{side}}{input or output side, for pass type
-terminal strips}
+terminal strips.}
+
+\item{\code{cable_side}}{"origin" or "dest" side of the cable.}
 }
 \if{html}{\out{</div>}}
 }
@@ -194,7 +197,7 @@ New_TS$gen_struct(3)
 New_cable <- CB$new("CB-001")
 New_cable$gen_struct("pair", 1, TRUE, FALSE)
 
-New_TS$add_cable(New_cable, side = "input")
+New_TS$add_cable(New_cable, side = "input", cable_side = "dest")
 (New_TS_df_updated <- New_TS$df_struct())
 }
 \if{html}{\out{</div>}}
@@ -210,7 +213,7 @@ Connect cable to existing terminals. If not enough
 terminals available for connect the cable, raise an
 error. Will overwrite existing connections.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TS$con_cable(cable, side = NULL, init)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TS$con_cable(cable, side = NULL, cable_side, init)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -238,7 +241,7 @@ New_TS$gen_struct(3)
 New_cable <- CB$new("CB-001")
 New_cable$gen_struct("pair", 1, TRUE, FALSE)
 
-New_TS$con_cable(New_cable, init = 1)
+New_TS$con_cable(New_cable, init = 1, cable_side = "origin")
 
 (New_TS_df_upt <- New_TS$df_struct())
 }

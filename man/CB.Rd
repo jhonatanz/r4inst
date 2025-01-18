@@ -7,15 +7,25 @@
 a data frame with the structure of the cable.
 }
 \description{
-The class cable defines various fields and methods that allows three basic operations (methods):
-\itemize{
-\item Create a cable structure: given a group type and a group quantity (see the definitions of the fields) create and numerate the conductors of the cable.
-\item provide a data frame with the structure of the cable to be used on other process.
-\item define other attributes.
-}
+The object store information about cables to be used in an automation
+project.
 }
 \details{
-The object store information about cables to be used in an automation project
+The class cable defines various fields and methods that allows basic
+operations (methods):
+\itemize{
+\item Create a cable structure: given a group type and a group quantity (see the
+definitions of the fields) create and numerate the conductors of the cable.
+\item Provide a data frame with the structure of the cable to be used on other
+process.
+\item Assign a device and terminal strip to both ends of the cable, called
+"origin" and "dest". This should be used by other methods when cable is
+connected.
+\item Define other attributes.
+}
+
+Please note that the methods for connect cables are addressed within TS
+objects.
 }
 \examples{
 
@@ -27,8 +37,8 @@ The object store information about cables to be used in an automation project
 
 New_Cable <- CB$new("cable-001")
 
-# Structure definition of a cable grouped by pairs, with 3 pairs,
-# individual and overall shield.
+# Structure definition of a cable grouped by pairs, with
+# 3 pairs, individual and overall shield.
 
 New_Cable$gen_struct("pair", 3, TRUE, TRUE)
 New_Cable$df_struct()
@@ -47,7 +57,7 @@ str(df_struct)
 ## Method `CB$update_attr`
 ## ------------------------------------------------
 
-# Update of atributtes of a cable
+# Update of attributes of a cable
 
 New_Cable <- CB$new("cable-001")
 
@@ -58,25 +68,51 @@ at <- list(
 
 New_Cable$update_attr(at)
 New_Cable
+
+## ------------------------------------------------
+## Method `CB$update_cable_conn`
+## ------------------------------------------------
+
+# Update cable connection
+
+New_Cable <- CB$new("cable-001")
+New_Cable$origin_conn
+New_Cable$dest_conn
+New_Cable$update_cable_conn("Dev", "Dev_TS", "origin")
+New_Cable$origin_conn
+New_Cable$dest_conn
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{tag}}{Cable name: character.}
 
-\item{\code{cable_spec}}{Cable Specification document code: character.}
+\item{\code{cable_spec}}{Cable Specification document code:
+character.}
 
-\item{\code{group}}{Cable agroupation: "cond" per conductor, "pair" per pairs, "triad" per triads, "quad" per quartet: character.}
+\item{\code{group}}{Cable grouping: "cond" per conductor,
+"pair" per pairs, "triad" per triads, "quad" per quartet:
+character.}
 
 \item{\code{groups_qty}}{Groups quantity: numeric, int.}
 
-\item{\code{ovr_shield}}{If cable have overall shield or not: logic.}
+\item{\code{ovr_shield}}{If cable have overall shield or not:
+logic.}
 
-\item{\code{ind_shields}}{If each group have shield or not: logic.}
+\item{\code{ind_shields}}{If each group have shield or not:
+logic.}
 
-\item{\code{ovr_diam}}{The overall diameter of the cable: numeric, float.}
+\item{\code{ovr_diam}}{The overall diameter of the cable:
+numeric, float.}
 
-\item{\code{ovr_diam_UOM}}{The overall diameter units of measurement.}
+\item{\code{ovr_diam_UOM}}{The overall diameter units of
+measurement.}
+
+\item{\code{origin_conn}}{Terminal strip to which the origin
+(field side) of the cable is connected.}
+
+\item{\code{dest_conn}}{Terminal strip to which the destiny
+(control system side) of the cable is connected.}
 
 \item{\code{struct}}{Data structure for conductors and groups.}
 }
@@ -89,6 +125,7 @@ New_Cable
 \item \href{#method-CB-gen_struct}{\code{CB$gen_struct()}}
 \item \href{#method-CB-df_struct}{\code{CB$df_struct()}}
 \item \href{#method-CB-update_attr}{\code{CB$update_attr()}}
+\item \href{#method-CB-update_cable_conn}{\code{CB$update_cable_conn()}}
 \item \href{#method-CB-print}{\code{CB$print()}}
 \item \href{#method-CB-clone}{\code{CB$clone()}}
 }
@@ -117,7 +154,8 @@ A new \code{cable} object.
 \if{html}{\out{<a id="method-CB-gen_struct"></a>}}
 \if{latex}{\out{\hypertarget{method-CB-gen_struct}{}}}
 \subsection{Method \code{gen_struct()}}{
-Generates the data structure for conductors and groups, modifies the object updating the 'struct' field.
+Generates the data structure for conductors and groups,
+and saves on the 'struct' field.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CB$gen_struct(group, groups_qty, ind_shields, ovr_shield)}\if{html}{\out{</div>}}
 }
@@ -125,13 +163,19 @@ Generates the data structure for conductors and groups, modifies the object upda
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{group}}{Cable agroupation: "cond" per conductor, "pair" per pairs, "triad" per triads, "quad" per quartet: character.}
+\item{\code{group}}{Cable grouping: "cond" per conductor,
+"pair" per pairs, "triad" per triads, "quad" per quartet:
+character.}
 
 \item{\code{groups_qty}}{Groups quantity: numeric, int.}
 
-\item{\code{ind_shields}}{If each group have shield or not: logic.}
+\item{\code{ind_shields}}{If each group have shield or not.
+For individual groups (groups_qty = 1) with shield,
+this should be ind_shields = TRUE and ovr_shield = FALSE:
+logic.}
 
-\item{\code{ovr_shield}}{If cable have overall shield or not: logic.}
+\item{\code{ovr_shield}}{If cable have overall shield or not:
+logic.}
 }
 \if{html}{\out{</div>}}
 }
@@ -141,8 +185,8 @@ Generates the data structure for conductors and groups, modifies the object upda
 
 New_Cable <- CB$new("cable-001")
 
-# Structure definition of a cable grouped by pairs, with 3 pairs,
-# individual and overall shield.
+# Structure definition of a cable grouped by pairs, with
+# 3 pairs, individual and overall shield.
 
 New_Cable$gen_struct("pair", 3, TRUE, TRUE)
 New_Cable$df_struct()
@@ -178,7 +222,9 @@ str(df_struct)
 \if{html}{\out{<a id="method-CB-update_attr"></a>}}
 \if{latex}{\out{\hypertarget{method-CB-update_attr}{}}}
 \subsection{Method \code{update_attr()}}{
-Updates attributes for cable, specifically cable specification, overall diameter, overall diameter UOM, this data is encapsulated on a list.
+Updates attributes for cable, specifically cable
+specification, overall diameter, overall diameter UOM,
+this data is encapsulated on a list.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CB$update_attr(attrib)}\if{html}{\out{</div>}}
 }
@@ -186,13 +232,14 @@ Updates attributes for cable, specifically cable specification, overall diameter
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{attrib}}{list with the following named fields: cable_spec, ovr_diam, ovr_diam_UOM.}
+\item{\code{attrib}}{list with the following named fields:
+cable_spec, ovr_diam, ovr_diam_UOM.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{# Update of atributtes of a cable
+\preformatted{# Update of attributes of a cable
 
 New_Cable <- CB$new("cable-001")
 
@@ -203,6 +250,48 @@ at <- list(
 
 New_Cable$update_attr(at)
 New_Cable
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CB-update_cable_conn"></a>}}
+\if{latex}{\out{\hypertarget{method-CB-update_cable_conn}{}}}
+\subsection{Method \code{update_cable_conn()}}{
+Register the devices connected to an end of a cable,
+named as "origin" and "dest", origin is defined as the
+field size, and dest is defined as the control system
+side.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CB$update_cable_conn(device, term_strip, cable_side)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{device}}{tag or name of the device to which the
+cable will be connected.}
+
+\item{\code{term_strip}}{terminal strip tag or name within the
+device to which the cable will be connected.}
+
+\item{\code{cable_side}}{one of the both ends of the cable, can
+be "origin" or "dest".}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{# Update cable connection
+
+New_Cable <- CB$new("cable-001")
+New_Cable$origin_conn
+New_Cable$dest_conn
+New_Cable$update_cable_conn("Dev", "Dev_TS", "origin")
+New_Cable$origin_conn
+New_Cable$dest_conn
 }
 \if{html}{\out{</div>}}
 

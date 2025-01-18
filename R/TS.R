@@ -6,7 +6,7 @@
 #'
 #' - Create a terminal strip: given a name, a device and type of terminal.
 #' - Create a structure of terminal strip given a quantity of terminals.
-#' - Add terminals to connect a cable.
+#' - Add terminals to connect a cable and connect this cable.
 #' - Connect a cable conductor to terminals in the strip.
 #'
 #' @details
@@ -15,7 +15,7 @@
 #' The "end" terminal strip type is used for devices at the end of a path, i.e
 #' instruments, control panels, final elements, control systems.
 #'
-#' The "pass" terminal strip type is used for Junction Boxes or marshalling
+#' The "pass" terminal strip type is used for Junction Boxes or Marshalling
 #' panels in which the terminals will have two sides: "input" and "output", and
 #' terminal will connect two ends of cables.
 #'
@@ -61,7 +61,8 @@ TS <- R6::R6Class("TS",
 
                     #' @description
                     #' Creates the structure of terminals object. Modifies
-                    #' the struct field of the object.
+                    #' the struct field of the object. To be run the first time
+                    #' we create a structure of a TS.
                     #' @param term_qty Quantity of terminals required.
                     gen_struct = function(term_qty){
                       self$term_qty <- term_qty
@@ -88,9 +89,10 @@ TS <- R6::R6Class("TS",
                     #' @description
                     #' Add terminals to the terminal strip at the end of it and
                     #' connect a cable to those.
-                    #' @param cable a cable object to be added
+                    #' @param cable a cable object to be added.
                     #' @param side input or output side, for pass type
-                    #' terminal strips
+                    #' terminal strips.
+                    #' @param cable_side "origin" or "dest" side of the cable.
                     #' @examples
                     #' # Addition of a new cable to an existing terminal strip
                     #' New_TS <- TS$new("TS-001", "JB-001", "pass")
@@ -100,9 +102,9 @@ TS <- R6::R6Class("TS",
                     #' New_cable <- CB$new("CB-001")
                     #' New_cable$gen_struct("pair", 1, TRUE, FALSE)
                     #'
-                    #' New_TS$add_cable(New_cable, side = "input")
+                    #' New_TS$add_cable(New_cable, side = "input", cable_side = "dest")
                     #' (New_TS_df_updated <- New_TS$df_struct())
-                    add_cable = function(cable, side = NULL){
+                    add_cable = function(cable, side = NULL, cable_side){
                       cable_df <- cable$df_struct()
                       ts_df <- self$df_struct()
                       qty <- nrow(cable_df)
@@ -121,6 +123,7 @@ TS <- R6::R6Class("TS",
                       }
                       private$append_struct(struct)
                       self$term_qty <- nrow(self$df_struct())
+                      cable$update_cable_conn(self$device, self$tag, cable_side)
                       invisible(self)
                     },
 
@@ -144,10 +147,10 @@ TS <- R6::R6Class("TS",
                     #' New_cable <- CB$new("CB-001")
                     #' New_cable$gen_struct("pair", 1, TRUE, FALSE)
                     #'
-                    #' New_TS$con_cable(New_cable, init = 1)
+                    #' New_TS$con_cable(New_cable, init = 1, cable_side = "origin")
                     #'
                     #' (New_TS_df_upt <- New_TS$df_struct())
-                    con_cable = function(cable, side = NULL, init){
+                    con_cable = function(cable, side = NULL, cable_side, init){
                       cable_df <- cable$df_struct()
                       ts_df <- self$df_struct()
                       from <- init
@@ -174,12 +177,13 @@ TS <- R6::R6Class("TS",
                       }
                       if(self$term_type == "end"){
                         term_conn <- paste(cable_df$tag, cable_df$group,
-                                             cable_df$cond, sep = "/")
+                                           cable_df$cond, sep = "/")
                         for(i in from:to){
                           self$struct$term_conn[[i]] <- term_conn[i-init+1]
                         }
                       }
-                    invisible(self)
+                      cable$update_cable_conn(self$device, self$tag, cable_side)
+                      invisible(self)
                     },
 
                     #' @description
@@ -213,21 +217,23 @@ TS <- R6::R6Class("TS",
                   ),
                   private = list(
                     append_struct = function(struct){
+                      # attach a structure to a new TS or an existing TS, it
+                      # modifies the field 'struct' of the object
                       if(self$term_type == "end"){
                         self$struct$nums <- append(self$struct$nums,
                                                    struct$nums)
                         self$struct$term_tags <- append(self$struct$term_tags,
-                                                   struct$term_tags)
+                                                        struct$term_tags)
                         self$struct$term_conn <- append(self$struct$term_conn,
-                                                   struct$term_conn)
+                                                        struct$term_conn)
                       }
                       if(self$term_type == "pass"){
                         self$struct$nums_inp <- append(self$struct$nums_inp,
-                                                   struct$nums_inp)
+                                                       struct$nums_inp)
                         self$struct$term_tags_I <- append(self$struct$term_tags_I,
-                                                        struct$term_tags_I)
+                                                          struct$term_tags_I)
                         self$struct$term_conn_I <- append(self$struct$term_conn_I,
-                                                        struct$term_conn_I)
+                                                          struct$term_conn_I)
                         self$struct$nums_out <- append(self$struct$nums_out,
                                                        struct$nums_out)
                         self$struct$term_tags_O <- append(self$struct$term_tags_O,
@@ -238,6 +244,8 @@ TS <- R6::R6Class("TS",
                     },
 
                     create_struct = function(from, qty){
+                      # provides a structure to be attached to a new TS or an
+                      # existing TS, it doesn't modify the fields of the object
                       if(self$term_type == "end"){
                         nums <- paste0("T", seq(from = from,
                                                 to = from + qty - 1))
